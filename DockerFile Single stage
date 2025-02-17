@@ -1,26 +1,26 @@
-# Dockerfile single-stage
 FROM node:20-alpine
 
-# utilisateur non root
+# Création de l'utilisateur non root
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Rep de travail
 WORKDIR /app
 
 # Copie des fichiers nécessaires
-COPY package*.json ./
+COPY package*.json tsconfig.json ./
 
-#dépendances
-RUN npm ci --production
+# Installation des dépendances
+RUN npm install
 
 # Copie du code source
-COPY server.js ./
+COPY src ./src
 
-# Changement de user
+# Compilation TypeScript -> JavaScript
+RUN npx tsc
+
+# Changement de l'utilisateur
 USER appuser
 
-# open port
 EXPOSE 3000
 
-# exec
-CMD ["node", "server.js"]
+# Commande d'exécution
+CMD ["node", "dist/server.js"]
